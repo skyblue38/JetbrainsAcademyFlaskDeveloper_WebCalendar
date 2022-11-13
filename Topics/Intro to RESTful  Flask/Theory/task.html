@@ -1,0 +1,72 @@
+<h2>Intro to RESTful  Flask</h2>
+<html><body><p>Previously, we've already discussed what REST API architecture is, its main principles, and the basic HTTP methods. In this topic, we are going to discuss how REST can be incorporated into Flask. It will allow us to follow REST principles when creating Flask applications.</p>
+<h5 id="flask-restful">Flask-RESTful</h5>
+<p>Let's start with a Flask extension called <code class="language-python">Flask-RESTful</code>. It is a Python module that allows us to build a RESTful API with Flask. Before we go further, we should note that all API endpoints (routes) will look like the default <code class="language-python">view</code> functions.</p>
+<p>The first thing we need is the <code class="language-python">Api</code> class initialized by connecting a specific application. It maintains all API, including endpoints (routes), different requests, and so on. Let's take a look:</p>
+<pre><code class="language-python">from flask import Flask
+from flask_restful import Resource, Api
+
+app = Flask('main')
+api = Api(app)
+</code></pre>
+<p>There, we create the default application and initialize the <code class="language-python">Api</code> object that helps us with the RESTful part of our project.</p>
+<p>The second thing we need is <code class="language-python">Resource</code>. It's a class that provides an easy way to create API functions: we can write classes that inherit <code class="language-python">Resource</code> and use its architecture to create an API. In the example below, we create the <code class="language-python">HelloWorld</code> class that inherits <code class="language-python">Resource</code> with a <code class="language-python">GET</code> method. This view class will be an API endpoint:</p>
+<pre><code class="language-python">class HelloWorld(Resource):
+    def get(self):
+        return {'hello': 'world'}</code></pre>
+<p>As you may have guessed, the names of class functions define the HTTP request method that this function will handle. In this way, we have indicated the API behavior when we access this endpoint with the <code class="language-python">GET</code> method.</p>
+<p>Finally, we need to indicate which URL will access our endpoint. You can do this with the <code class="language-python">add_resource</code> method:</p>
+<pre><code class="language-python">api.add_resource(HelloWorld, '/')
+
+app.run(debug=True)</code></pre>
+<p>Time to run our app! Let's look at what we've created and send a couple of requests. If everything is correct, we will see the following string when we try to reach <code class="language-python">https://127.0.0.1:5000/</code>:</p>
+<p style="text-align: center;"><img alt="" height="154" name="2021-10-16_17-51-00.png" src="https://ucarecdn.com/56f127f1-d675-4c80-813f-9029db459d06/" width="336"/></p>
+<p>This API behavior allows us to create <code class="language-python">Resource</code> objects instead of <code class="language-python">view</code> functions. What are the pros of this? It's easier to use the pre-defined methods than divide the request types with the <code class="language-python">request</code> object.</p>
+<h5 id="parsing-arguments">Parsing arguments</h5>
+<p>Flask allows us to quickly get data from the request body, but we should also parse arguments from a URL for our API. The <code class="language-python">reqparse</code> interface can help us with this! It's a built-in <code class="language-python">flask_restful</code> feature that works similarly to the <code class="language-python">argparse</code> module.</p>
+<p>Again, we start with the default app and create the <code class="language-python">Api</code> object for it.</p>
+<pre><code class="language-python">from flask import Flask
+from flask_restful import Resource, Api, reqparse
+
+app = Flask('main')
+api = Api(app)
+</code></pre>
+<p>Don't forget to preconfigure the parser:</p>
+<pre><code class="language-python">parser = reqparse.RequestParser()
+parser.add_argument('Writing', type=str, help='This is what You will see on The Wall')
+</code></pre>
+<p>We've created the <code class="language-python">RequestParser</code> object and specified an argument with the name of <code class="language-python">writing</code>, type is <code class="language-python">str</code>, a description is provided in the <code class="language-python">help</code> argument. The next step is to create a resource that requires data from a URL:</p>
+<pre><code class="language-python">class HelloArgs(Resource):
+    def get(self):
+       data = parser.parse_args()  
+       return {'data_from_url': data}</code></pre>
+<p>The final move — create a route to our resource using the <code class="language-python">add_resource</code> method:</p>
+<pre><code class="language-python">api.add_resource(HelloArgs, '/')</code></pre>
+<p>This is it! Let's start the application and see what happens. To test our API, we will use <code class="language-python">curl</code> and execute the following command:</p>
+<pre><code class="language-bash">curl 127.0.0.1:5000/?Writing=PinkFloyd</code></pre>
+<p>As you know, we write a question mark in URL requests to denote the URL end and the start of arguments. We send a request to the URL <code class="language-python">127.0.0.1:5000/</code> and specify the <code class="language-python">writing</code> argument.</p>
+<p>As we've mentioned above, <code class="language-python">reqparse</code> is similar to <code class="language-python">argparse</code>. It allows you to parse the query request string easily and typecast its parameters. If we take the example above, we will end up with the following result:</p>
+<pre><code class="language-json">{"data_from_url": {"Writing": "PinkFloyd"}}</code></pre>
+<p>Another way to get data from a URL is to use the basic Flask views. You can also use it with <code class="language-python">flask_restful</code>. We can put the variable name directly to the URL. It will be like this (you can imagine any variable instead of <code class="language-python">megavar</code>):</p>
+<pre><code class="language-bash">http://127.0.0.1:5000/data/&lt;megavar&gt;</code></pre>
+<p>After this, insert this URL in the corresponding Python function:</p>
+<pre><code class="language-python">@app.route('/data/&lt;megavar&gt;')
+def main_view(megavar):
+    return f'Your data from URL: {megavar}'</code></pre>
+<p>We can use both ways to get data from the users or another program; the choice depends on the situation.</p>
+<h5 id="getting-json-data-from-requests">Getting JSON data from requests</h5>
+<p>As you may already know, REST applications often use JSON as a body data exchange format, so it's essential to know how to extract this data from client requests.</p>
+<p>Flask's <code class="language-python">request</code> object has a <code class="language-python">json</code> attribute that returns the request's JSON body if it has one. If the request data's MIME-type differs from <em>application/json</em>, it will return <code class="language-python">None</code>. </p>
+<p>As a rule, Input JSON data is received via <code class="language-python">POST</code> request; assuming you have created an app in the previous paragraph, let's add the <code class="language-python">Hello</code> Resource and a <code class="language-python">POST</code> endpoint to it and see how retrieving JSON works:</p>
+<pre><code class="language-python">from flask import request
+
+class Hello(Resource):
+    def post(self):
+        # let's assume we're expecting to receive a JSON body
+        # containing key 'message'
+        data = request.json
+        message = data['message']
+        return {"response": "message received"}</code></pre>
+<p>The <code class="language-python">json</code> attribute returns a regular Python <code class="language-python">dict</code> with all the JSON data received from the client. So if the request body was <code class="language-python">{"message": "Hello world"}</code>; then in the example above the <code class="language-python">message</code> variable will be set to store the string value — <code class="language-python">Hello world</code>.</p>
+<h5 id="conclusion">Conclusion</h5>
+<p>In this topic, we've learned how to create simple RESTful APIs and to parse arguments with Flask tools. The <code class="language-python">flask_restful</code> extension is practical when it comes to building REST APIs. It provides you with multiple tools to create API endpoints with ease. Now, let's practice!</p></body></html>

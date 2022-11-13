@@ -1,0 +1,26 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    from flask import Flask
+
+    app = Flask(__name__)
+
+    @app.route("/capital/<country>")
+    def capital(country):
+
+        capitals_dictionary = {
+            "Russia":"Moscow",
+            "Ukraine":"Kiev",
+            "USA":"Washington"
+        }
+
+        # your code here checks that the country is on the list, if not, then abort(400)
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/17371#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Fri, 11 Nov 2022 12:01:52 UTC"
+record: -1

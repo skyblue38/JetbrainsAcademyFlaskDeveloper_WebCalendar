@@ -1,0 +1,90 @@
+<h2>Marshalling data</h2>
+<html><body><p>In this topic, we will discuss what <strong>marshalling</strong> stands for. It is a crucial topic because data transmission largely determines the work of a program. When we marshal data, we sort and structurize the data for end-users. </p>
+<h5 id="basic-marshalling">Basic marshalling</h5>
+<p>In broad terms, marshalling is a process of converting an object in computer memory into a form that can be sent as a message; for example, a response message from your application. </p>
+<p>Our journey into the depth of information formatting starts with the Flask built-in <code class="language-python">marshal_with</code> decorator. It transforms data, depending on the predefined scheme we've developed. But first, the standard ritual — create the default app and API objects:</p>
+<pre><code class="language-python">from flask import Flask
+from flask_restful import Resource, Api, marshal_with, fields
+
+app = Flask('main')
+api = Api(app)
+</code></pre>
+<p>Then, let's create a class named <code class="language-python">TodoDao</code>. This is the object we'll be working with:</p>
+<pre><code class="language-python">class TodoDao(object):
+    def __init__(self, task, description):
+        self.task = task
+        self.description = description</code></pre>
+<p>Usually, we don't want to limit ourselves by an app. We also want to share objects with the client, whether it's a frontend application or another machine. Let's create a dictionary that will define the rules for marshalling. For this task, we will use the <code class="language-python">fields</code> module that contains different types of data: string, integer, DateTime, and others.</p>
+<pre><code class="language-python">resource_fields = {
+    'task':   fields.String,
+    'description':    fields.String
+}</code></pre>
+<p>The  marshalling architecture will be quite simple: one object with data fields (the <code class="language-python">TodoDao</code> class), one dictionary with data types for each field (<code class="language-python">resource_fields</code>), and <code class="language-python">Resource</code>. The only thing missing, for now, is the <code class="language-python">Resource</code> that is called for the <code class="language-python">TodoDao</code> object information:</p>
+<pre><code class="language-python">class Todo(Resource):
+    @marshal_with(resource_fields)
+    def get(self, **kwargs):
+        return TodoDao(task="I've become so numb", description="I can't feel you there")</code></pre>
+<p>As you can see, we use the <code class="language-python">marshal_with</code> decorator and specify the data types of our dictionary in brackets. After that, we return the <code class="language-python">TodoDao</code> object. Because of the decorator, the function will return an automatically generated response object with the <code class="language-python">200</code> status code and the resulting dictionary as a message. Now, it's time to add <code class="language-python">Resource</code> to the API and launch the app! When we execute the <code class="language-python">curl 127.0.0.1:5000/</code> command, the app outputs the following:</p>
+<p style="text-align: center;"><img alt="" height="22" name="image.png" src="https://ucarecdn.com/f00979ed-a002-4f77-a324-0d416b360877/" width="584"/></p>
+<p>This means that everything is correct. What is the difference, though? Let's see another example. We will replace the value of the <code class="language-python">task</code> string with an integer in the code:</p>
+<pre><code class="language-python">class Todo(Resource):
+    @marshal_with(resource_fields)
+    def get(self, **kwargs):
+        return TodoDao(task=20072017, description="I can't feel you there")</code></pre>
+<p>Now, let's restart the application and execute another request. We will see how the data is updated:</p>
+<p style="text-align: center;"><img alt="" height="21" name="image.png" src="https://ucarecdn.com/95832bb4-1c87-4099-9775-0a6080bb9420/" width="487"/></p>
+<p>If you look carefully, you will see that we've specified an <code class="language-python">int</code> value in the <code class="language-python">task</code> argument, but as a JSON answer, we've got an <code class="language-python">str</code> value. This is due to the <code class="language-python">marshal_with</code> decorator that helped us transform an integer into a string.</p>
+<h5 id="marshmallow-for-marshalling">Marshmallow for marshalling</h5>
+<p>We've figured out how to create common datatype rules, but now it's time for serious business. Let's talk about the <code class="language-python">marshmallow</code> module that can be very useful in complex and bulky APIs. It allows us to create <strong>schemas </strong>that we will use as frames for <code class="language-python">Resources</code>. For example, we know that our task resource has a name and a description. Previously, we've defined its fields and their datatypes using a simple dictionary. This is inconvenient when we use dictionaries when working with databases. So, we need another method. This is where Object-oriented programming can help us, namely, the <code class="language-python">marshmallow</code> module. Let's define the default app and API:</p>
+<pre><code class="language-python">from flask import Flask
+from flask_restful import Resource, Api, reqparse
+from marshmallow import Schema, fields
+
+
+app = Flask('main')
+api = Api(app)
+</code></pre>
+<p>The next thing we should do is to create an argument parser for our API. Say, we need three arguments for our task resource: <code class="language-python">name</code>, <code class="language-python">description</code>, and <code class="language-python">severity</code>. The parser will look like this:</p>
+<pre><code class="language-python">parser = reqparse.RequestParser()
+parser.add_argument('name')
+parser.add_argument('description')
+parser.add_argument('severity')</code></pre>
+<p>It's pretty simple to create the parser and add three arguments.</p>
+<p>Now, a new thing: <code class="language-python">schema</code>. We can create a class of <code class="language-python">TaskSchema</code> and add some fields there:</p>
+<pre><code class="language-python">class TaskSchema(Schema):
+    name = fields.String()
+    description = fields.String()
+    severity = fields.Integer()</code></pre>
+<p>The attributes of this class will repeat the parser arguments, so if you change the parser, make sure that you change the schema as well.</p>
+<p></p><div class="alert alert-primary"> This class inherits the base schema object. When we declare a schema with fields, we should create the instances of objects. You can see the difference between the schema and our first resource dictionary.</div><p></p>
+<p>The final steps are to create <code class="language-python">Resource</code>:</p>
+<pre><code class="language-python">class TaskResource(Resource):
+    def get(self):
+        schema = TaskSchema()
+        args = parser.parse_args()
+        return schema.dump(args)</code></pre>
+<p>In this snippet, you can see an instance of <code class="language-python">TaskSchema</code> and the arguments. We obtain these arguments from the parser to create a response combining schemas opportunities and the data from users. And this is it! Let's add the resource to our API and start the app.</p>
+<pre><code class="language-python">api.add_resource(TaskResource, '/')
+
+app.run()</code></pre>
+<pre><code class="language-bash">curl "http://127.0.0.1:5000/?name=The%20End&amp;description=We%20tried%20so%20hard%20and%20get%20so%20far&amp;severity=5"</code></pre>
+<p>This curl command is pretty long, and you can spot <code class="language-python">%20</code> inside. What are they? When we send requests with <code class="language-python">curl</code>, we should replace all spaces with the <code class="language-python">%20</code>: this is an encoded analog of the space bar. The result is as follows:</p>
+<p style="text-align: center;"><img alt="" height="88" name="image.png" src="https://ucarecdn.com/c715459a-94d6-4baf-8d69-e8d7fdf002e2/" width="437"/></p>
+<h5 id="basic-marshalling-vs-marshmallow">Basic marshalling VS marshmallow</h5>
+<p>Up to this point, <code class="language-python">marshmallow</code> looks pretty similar to <code class="language-python">marshal_with</code>. What's the difference, and why would we want to use <code class="language-python">marshmallow</code> instead?</p>
+<p>Sometimes our objects are more complex than just a few fields. Sometimes it processes database objects with relations, nested objects. <code class="language-python">Marshmallow</code> allows us to build nested schemas as well. Also, it is possible to set a default or a missing value for each field in a schema for deserializing and serializing data. It could look like this:</p>
+<pre><code class="language-python">class TaskSchema(Schema):
+    name = fields.String()
+    description = fields.String()
+    severity = fields.Integer()
+
+class LessonSchema(Schema):
+    name = fields.String()
+    description = fields.String()
+    level = fields.Integer()
+    tasks = fields.Nested(TaskSchema, default=[], missing=[])
+</code></pre>
+<p>Marshalling often comes together with <strong>unmarshalling</strong>. This is the opposite process of converting readable data (a dictionary) into an object. We use the <code class="language-python">load</code> function for this purpose.</p>
+<p>And it's only the beginning! If you want to discover more interesting features of that module, we recommend you visit the <a href="https://marshmallow.readthedocs.io/en/stable/index.html" rel="noopener noreferrer nofollow" target="_blank">Marshmallow documentation</a>.</p>
+<h5 id="conclusion">Conclusion</h5>
+<p>In this topic, we've touched upon the concept of data marshalling. Now, we know a few things about RESTful Flask: we can create RESTful APIs, marshal data, and how it can help us. Great job, don't slow down!</p></body></html>

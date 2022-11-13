@@ -1,0 +1,23 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: "<code>datetime(1582, 10, 4, 12, 1, 0)</code>"
+- text: "<code>datetime(1582, 4, 10, 0, 1, 0)</code>"
+- text: We'll get <code>ValueError</code>
+- text: "<code>datetime(1582, 10, 4, 0, 1, 0)</code>"
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/9815#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Mon, 07 Nov 2022 11:13:54 UTC"
+record: -1
+selected_options:
+- 2
+local_check: false

@@ -1,0 +1,70 @@
+<h2>Error handlers</h2>
+<html><body><p>Applications fail; servers occasionally do it, too. Sooner or later, you will have to face <strong>exceptions</strong>. Even if your code is 100% correct, you will encounter them from time to time. What causes them? For example, a client aborted a request while the application was still processing the incoming data. Or there's a programming error in the library you use. Or a database server is overloaded and cannot handle the request. Or a file system is full. Or the network connection fails, and so on. This is just a minuscule portion of the problems you may encounter.</p>
+<p>By default, if your application runs in the production mode and there's an error, Flask will display a plain page and log an exception. You can improve it, though. In this topic, we'll look at how to do it.</p>
+<h5 id="common-error-codes">Common error codes</h5>
+<p>As programmers, we should understand the main error types:</p>
+<ul>
+<li><strong>404 Not found</strong></li>
+</ul>
+<p>The well-known "You made a mistake with that URL, mate" message. It is a very common mistake on the Internet. The standard HTTP response <code class="language-python">404</code> code indicates that the client was able to communicate with the server, but the server cannot find the data as per request.</p>
+<ul>
+<li><strong>403 Forbidden</strong></li>
+</ul>
+<p><code class="language-python">403 Forbidden</code> means that you have limited or no access to the content on the page you are trying to reach.</p>
+<ul>
+<li><strong>HTTP Error Code 410</strong></li>
+</ul>
+<p>Do you know that <code class="language-python">404 Not Found</code> has a sibling <code class="language-python">410 Gone</code>? It indicates that the target resource is no longer available on the original server, and this state is likely to be permanent. When you don't know whether this state is temporary or permanent, use the <code class="language-python">404</code> status code instead.</p>
+<ul>
+<li><strong>Internal server error 500</strong></li>
+</ul>
+<p>It usually occurs due to programming errors or when the server is overloaded. It may be a good idea to have a placeholder page for this because your app will crash sooner or later.</p>
+<h5 id="error-handlers">Error handlers</h5>
+<p>Once you are familiar with the main error types, it's time to learn how to catch and direct these errors to the appropriate pages. The <strong>error handler</strong> is a function that returns a response when an error type occurs. It is quite similar to how a view function returns a response when it matches a request URL. To register an error handler, we need to pass an instance of the error to a built-in <code class="language-python">errorhandler</code> decorator or a <code class="language-python">register_error_handler</code> method. You can set a handler to catch any exception, but if you work with Flask, most likely, you'll deal with an instance of <code class="language-python">werkzeug.exceptions.HttpException</code>, a base class for all HTTP exceptions.</p>
+<p>Below is an example of processing the <code class="language-python">404 not found</code> exception. Remember that the <code class="language-python">render_template</code> function renders a template from the template folder with the specified context:</p>
+<pre><code class="language-python">from flask import render_template
+
+@app.errorhandler(404)
+def page_not_found(e):  # error instance is automatically passed to the function
+    return render_template('404.html'), 404  # set the 404 status explicitly</code></pre>
+<p>Here, the error handler is in the <code class="language-python">errorhandler</code> decorator. Note that when you register a handler for a <code class="language-python">werkzeug.exceptions.HTTPException</code> subclass like <code class="language-python">NotFound</code>, you can pass their HTTP code (<code class="language-python">NotFound.code == 404</code>) to the decorator as an argument. The decorator automatically passes the error instance to the function. Another important thing is that the status code will not be directed to the handler's response automatically. Make sure that you provide the appropriate HTTP status code on returning a response from the handler.</p>
+<p>Once you have this method, any <code class="language-python">404</code> exception raised during execution will render the <code class="language-python">404.html</code> template.</p>
+<p>Here's an example of how Google handles a <code class="language-python">404 error</code>:</p>
+<p style="text-align: center;"><img alt="" src="https://ucarecdn.com/7ebf7668-4b09-48ab-a62b-96f8756e8775/-/crop/692x284/24,14/-/preview/"/></p>
+<p>Sometimes, you'll also need to return the response as JSON. To do so, you can use <code class="language-python">jsonify()</code>, and <code class="language-python">errorhandler</code> will promote it as a JSON error message:</p>
+<pre><code class="language-python">from flask import jsonify
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify(error=str(e)), 404</code></pre>
+<h5 id="exception-class">Exception class</h5>
+<p>Python provides us with several built-in exceptions that force a program to output an error if something goes wrong. However, you may need to introduce a new custom exception to give more context for the error.</p>
+<p>Let's see how you can create a simple exception when something goes wrong with memory usage:</p>
+<pre><code class="language-python">class InsufficientStorage(werkzeug.exceptions.HTTPException):
+    code = 507
+    description = 'Not enough storage space.'
+
+app.register_error_handler(InsufficientStorage, handle_507)</code></pre>
+<p></p><div class="alert alert-primary"><code class="language-python">Register_error_handler()</code> is an alternative way to register an error handler. Similar to the <code class="language-python">errorhandler</code> decorator, it must know the error to handle and what function it should invoke when this error is raised. We can provide them as arguments.</div><p></p>
+<p>In the example above, we have registered the handler and invoked the <code class="language-python">handle_insuficcient</code> method. It should be predefined, just like the <code class="language-python">page_not_found</code> function in the Error handlers<strong> </strong>paragraph.</p>
+<p>Now, if something raises <code class="language-python">InsufficientStorageError</code>, Flask will know exactly what to do.</p>
+<h5 id="the-abort-function">The abort() function</h5>
+<p>Flask also comes with a handy <code class="language-python">abort()</code> function that terminates a request with an HTTP error code. If you want to quickly give an error a custom response, use the <code class="language-python">abort()</code> function for this. It will also provide you with a simple black-and-white error page with a basic description but no frills about it.</p>
+<p>The <code class="language-python">abort</code> helper wraps errors into a <code class="language-python">HTTPException</code> so they can behave properly. You can try the following:</p>
+<pre><code class="language-python">from flask import abort
+abort(400)</code></pre>
+<p>It will produce a <code class="language-python">400</code> HTTP code and the following output:</p>
+<pre><code class="language-python">{
+    "message": "The browser sent a request that this server could not understand."
+}</code>
+</pre>
+<p>You can edit this message:</p>
+<pre><code class="language-python">from flask import abort
+abort(400, 'My custom message')</code></pre>
+<p>The output will look like this:</p>
+<pre><code class="language-python">{
+    "message": "My custom message"
+}</code></pre>
+<p>The <code class="language-python">abort()</code> method is beneficial if you don't want to spend a lot of time processing errors in the code. Flask doesn't automatically return a proper template or a JSON message to the client, and sometimes you don't want to create anything fancy. That's when you use <code class="language-python">abort()</code> that handles errors (no exception raising, though) for you.</p>
+<h5 id="conclusions">Conclusions</h5>
+<p>In this topic, you've found out the main HTTP error types and learned to intercept and direct these errors to the appropriate pages using the <code class="language-python">errorhandler</code> decorator and <code class="language-python">register_error_handler</code> function. You've also learned how to create custom errors to provide more context or, on the contrary, use the <code class="language-python">abort()</code> function to return simple messages. Keep up the good work!</p></body></html>

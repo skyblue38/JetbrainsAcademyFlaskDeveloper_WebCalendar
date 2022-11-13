@@ -1,0 +1,18 @@
+type: choice
+is_multiple_choice: true
+options:
+- text: <code>reqparse.ArgumentParser()</code>
+- text: <code>api.create_daemon()</code>
+- text: <code>Resource.set_endpoint()</code>
+- text: <code>api.add_resource()</code>
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/18181#comment
+status: Solved
+record: -1
+local_check: false

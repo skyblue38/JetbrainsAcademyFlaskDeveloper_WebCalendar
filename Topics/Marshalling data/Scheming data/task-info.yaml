@@ -1,0 +1,17 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    # use the 'Fields' object, it's already imported
+
+    resourse_fields = {
+
+    }
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/18209#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Wed, 09 Nov 2022 10:04:04 UTC"
+record: -1

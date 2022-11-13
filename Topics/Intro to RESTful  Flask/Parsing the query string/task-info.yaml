@@ -1,0 +1,19 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    parser = RequestParser()
+    # add arguments to parser
+
+    @app.route('/')
+    def main_view():
+        # parse data here
+        return {'data_from_url': data}
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/18183#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Wed, 09 Nov 2022 07:11:35 UTC"
+record: -1

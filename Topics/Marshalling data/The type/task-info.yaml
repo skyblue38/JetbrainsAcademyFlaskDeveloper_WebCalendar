@@ -1,0 +1,21 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: A decorator that accepts fields and their types as input and is applied to
+    a Resource method
+- text: This is an object that allows the application to automatically process all
+    incoming requests in a unified way
+- text: A common function that takes input information and a schema
+- text: A decorator that takes fields and their types as input and is applied to a
+    Resource object
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/18206#comment
+status: Solved
+record: -1
+local_check: false

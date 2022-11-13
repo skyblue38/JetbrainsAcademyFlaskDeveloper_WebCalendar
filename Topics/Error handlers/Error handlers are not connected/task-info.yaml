@@ -1,0 +1,18 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: Errors will not be displayed at all.
+- text: 'Flask will display a blank screen. '
+- text: Flask will display a very simple page and log the exception.
+- text: There will be a server error.
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/17369#comment
+status: Solved
+record: -1
+local_check: false

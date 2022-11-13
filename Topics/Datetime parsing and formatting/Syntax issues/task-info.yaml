@@ -1,0 +1,18 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: "<code>print(datetime.strptime(08/01/2021, %m/%d/%Y))</code>"
+- text: "<code>print(datetime.strptime(\"08.01.2021\", \"%m/%d/%Y\"))</code>"
+- text: "<code>print(datetime.strptime(\"08/01/2021\", \"%m/%d/%Y\"))</code>"
+- text: "<code>print(datetime.strptime(\"08/01/2021\", \"%m/%d/%y\"))</code>"
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/15248#comment
+status: Solved
+record: -1
+local_check: false

@@ -1,0 +1,19 @@
+type: choice
+is_multiple_choice: false
+options:
+- text: Create a regular view function that returns JSON data.
+- text: Use the <code>Resource</code> object
+- text: Create a regular view function that has the <code>_API</code> ending in the
+    name
+- text: Use a <code>Dao</code> object
+files:
+- name: main.py
+  visible: true
+  text: |+
+    #  You can experiment here, it won’t be checked
+
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/18176#comment
+status: Solved
+record: -1
+local_check: false

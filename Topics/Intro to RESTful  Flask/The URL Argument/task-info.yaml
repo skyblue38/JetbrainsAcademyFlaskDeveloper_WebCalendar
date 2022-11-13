@@ -1,0 +1,17 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    from flask import Flask
+
+    app = Flask('main')
+
+
+    @app.route('your code here')
+    def main_view('code here'):
+        pass # code here
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/18182#comment
+status: Solved
+record: -1
